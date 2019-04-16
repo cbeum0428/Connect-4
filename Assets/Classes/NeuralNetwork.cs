@@ -17,6 +17,7 @@ namespace MachineLearning.Classes
         private List<double> errors;
         private List<double> historicalErrors;
 		private Random random;
+		private double fitnessScore;
         #endregion
 
         #region Constructors
@@ -48,6 +49,8 @@ namespace MachineLearning.Classes
                 weightMatricies.Add(m);
 
             }
+
+			fitnessScore = 0;
         }
         #endregion
 
@@ -94,6 +97,11 @@ namespace MachineLearning.Classes
         {
             return errors;
         }
+
+		public double getFitnessScore()
+		{
+			return fitnessScore;
+		}
         #endregion
 
         #region Setters
@@ -143,10 +151,20 @@ namespace MachineLearning.Classes
 
             historicalErrors.Add(error);
         }
-        #endregion
 
-        #region Functions
-        public void printToConsole() 
+		public void setFitnessScore(double v)
+		{
+			fitnessScore = v;
+		}
+
+		public void setWeightMatricies(List<Matrix> newWeightMatricies)
+		{
+			weightMatricies = newWeightMatricies;
+		}
+		#endregion
+
+		#region Functions
+		public void printToConsole() 
         {
             for (int i = 0; i < layers.Count;i++)
             {
@@ -321,6 +339,33 @@ namespace MachineLearning.Classes
 				Matrix m = new Matrix(topology[i], topology[i + 1], true, random);
 				weightMatricies.Add(m);
 			}
+		}
+
+		public NeuralNetwork mutate(double mr)
+		{
+			NeuralNetwork newnn = new NeuralNetwork(topology, random);
+			List<Matrix> newWeights = new List<Matrix>();
+			for (int i = 0;i < weightMatricies.Count;i++)
+			{
+				Matrix parentMatrix = weightMatricies[i];
+				Matrix newMatrix = new Matrix(parentMatrix.getRows(), parentMatrix.getCols(), false, random);
+
+				for (int r = 0; r < parentMatrix.getRows(); r++)
+				{
+					for (int c = 0; c < parentMatrix.getCols(); c++)
+					{
+						double rand = (double)random.Next(-1, 1) * ((double)random.Next(0, 100) / 100.0);
+						double newW = parentMatrix.getValue(r, c) * rand * mr;
+						newMatrix.setValue(r, c, newW);
+					}
+				}
+
+				newWeights.Add(newMatrix);
+			}
+
+			newnn.setWeightMatricies(newWeights);
+
+			return newnn;
 		}
         #endregion
     }
